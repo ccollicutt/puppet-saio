@@ -4,6 +4,7 @@ class saio {
 	# Install OpenStack Swift exactly the way the Swift All In One document describes
 	# See: http://docs.openstack.org/developer/swift/development_saio.html
 	#
+	# - note audit is not part of the instuctions
 
 	package { ['curl',
 			   'gcc', 
@@ -87,6 +88,7 @@ class saio {
 	# 
 	# More directories...
 	# - Note that the parent directories have to exist too otherwise puppet will fail
+	#
 
 	$server_dirs = ['/etc/swift', 
 				   '/etc/swift/object-server', 
@@ -114,5 +116,37 @@ class saio {
 				     File['/srv/4'],
 				    ]
 	}
+
+	file { '/etc/rc.local':
+		source => 'puppet:///modules/saio/rc.local',
+		owner => root,
+		group => root,
+		mode => 755
+	}
+
+	file { '/etc/rsyncd.conf':
+		source => 'puppet:///modules/saio/rsyncd.conf',
+		owner => root,
+		group => root,
+		mode => 644,
+		notify => Service['rsync']
+	}
+
+	file { '/etc/default/rsync':
+		source => 'puppet:///modules/saio/default_rsync',
+		owner => root,
+		group => root,
+		mode => 644,
+		notify => Service['rsync']
+	}
+
+    service { 'rsync':
+    	ensure => running,
+    	require => [ File['/etc/rsyncd.conf'], 
+    				 File['/etc/default/rsync'], 
+    				 Package['rsync']
+    			    ],
+
+    }
 
 }
