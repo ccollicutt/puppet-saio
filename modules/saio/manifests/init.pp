@@ -71,13 +71,21 @@ class saio {
     # Create server mount points 
     # 
 
-    $sdb1_dirs = [ "/mnt/sdb1/1", "/mnt/sdb1/2", "/mnt/sdb1/3", "/mnt/sdb1/4" ]
+    define create_srv_mnt_points {
+  		file { "/srv/${title}":
+      		ensure => link,
+     		target => "/mnt/sdb1/${title}",
+    		#require => File["/srv/${title}"]
+  		}
+	}
 
-    file { $sdb1_dirs:
-    	ensure => directory,
-    	owner => vagrant,
-    	group => vagrant,
-    	mode => 644,
-    	require => Mount['/mnt/sdb1'],
-    }
+	$srv_mnt_points = ['1','2','3','4']
+
+	create_srv_mnt_points { $srv_mnt_points: }
+
+
+
+
+
+
 }
