@@ -158,4 +158,38 @@ class saio {
 
     }
 
+    #
+    # Memcached
+    #
+
+    service { 'memcached':
+    	ensure => 'running'
+    }
+
+    #
+    # logging
+    #
+
+    file { '/etc/rsyslog.d/10-swift.conf':
+    	source => 'puppet:///modules/saio/10-swift.conf',
+    	notify => Service['rsyslog'],
+    	group => root,
+    	owner => root,
+    	mode => 644
+    }
+
+    file { '/etc/rsyslog.conf':
+    	source => 'puppet:///modules/saio/rsyslog.conf',
+    	notify => Service['rsyslog'],
+		group => root,
+    	owner => root,
+    	mode => 644
+    }
+
+    service { 'rsyslog':
+    	ensure => 'running',
+    	require => File['/etc/rsyslog.d/10-swift.conf']
+    }
+
+
 }
