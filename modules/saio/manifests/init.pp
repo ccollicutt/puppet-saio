@@ -191,5 +191,21 @@ class saio {
     	require => File['/etc/rsyslog.d/10-swift.conf']
     }
 
+    file { '/var/log/swift':
+    	ensure => directory,
+    	owner => syslog,
+    	group => adm,
+    	mode => 755,
+    	notify => Service['rsyslog']
+    }
+
+    file { '/var/log/swift/hourly':
+    	ensure => directory,
+    	owner => syslog,
+    	group => adm,
+    	mode => 755,
+    	notify => Service['rsyslog']
+    }
+
 
 }
