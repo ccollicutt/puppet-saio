@@ -1,5 +1,10 @@
 class saio {
 	
+	#
+	# Install OpenStack Swift exactly the way the Swift All In One document describes
+	# See: http://docs.openstack.org/developer/swift/development_saio.html
+	#
+
 	package { ['curl',
 			   'gcc', 
 			   'memcached',
@@ -62,4 +67,17 @@ class saio {
         require => File['/mnt/sdb1'],
     }
 
+    # 
+    # Create server mount points 
+    # 
+
+    $sdb1_dirs = [ "/mnt/sdb1/1", "/mnt/sdb1/2", "/mnt/sdb1/3", "/mnt/sdb1/4" ]
+
+    file { $sdb1_dirs:
+    	ensure => directory,
+    	owner => vagrant,
+    	group => vagrant,
+    	mode => 644,
+    	require => Mount['/mnt/sdb1'],
+    }
 }
