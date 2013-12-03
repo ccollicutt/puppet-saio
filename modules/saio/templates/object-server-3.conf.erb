@@ -4,7 +4,7 @@ mount_check = false
 disable_fallocate = true
 bind_port = 6030
 workers = 1
-user = vagrant
+user = <%= @swiftuser %>
 log_facility = LOG_LOCAL4
 recon_cache_path = /var/cache/swift3
 eventlet_debug = true

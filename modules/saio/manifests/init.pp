@@ -1,9 +1,20 @@
-class saio {
+class saio ( $swiftuser='vagrant', $swiftgroup='vagrant' ) {
 	
 	#
 	# Install OpenStack Swift exactly the way the Swift All In One document describes
 	# See: http://docs.openstack.org/developer/swift/development_saio.html
 	#
+
+	# But first lets make sure the swiftuser/group exist
+	group { $swiftgroup:
+        ensure => present,
+	}
+	user { $swiftuser:
+        ensure => present,
+        membership => minimum,
+        shell => "/bin/bash",
+        require => Group["$swiftgroup"]
+	}
 
 	# only run if needed
 	exec { "apt-get update":
@@ -11,6 +22,7 @@ class saio {
 		onlyif => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | /bin/grep . > /dev/null'",
 	}
 
+	# now start installing as per instructions...
 	package { [
 			   'curl',
 			   'gcc', 
@@ -81,10 +93,9 @@ class saio {
 
     # 
     # Create server mount points which are links to the /mnt/sdb1/[1,2,3,4] directories
-    # - Note that we have to do a bit of trickery here with puppet and a defined resource.
     #
 
-    define create_srv_mnt_points {
+    define create_srv_mnt_points() {
     	file { "/mnt/sdb1/${title}":
     		ensure => directory,
     	}
@@ -124,8 +135,8 @@ class saio {
 
 	file { $server_dirs:
 		ensure => directory,
-		owner => vagrant,
-		group => vagrant,
+		owner => $swiftuser,
+		group => $swiftuser,
 		mode => 644,
 		require => [ 
 					File['/srv/1'],
@@ -142,7 +153,7 @@ class saio {
 	# 
 
 	file { '/etc/rc.local':
-		source => 'puppet:///modules/saio/rc.local',
+		content => template('saio/rc.local.erb'),
 		owner => root,
 		group => root,
 		mode => 755
@@ -153,11 +164,10 @@ class saio {
 	#
 
 	file { '/etc/rsyncd.conf':
-		source => 'puppet:///modules/saio/rsyncd.conf',
+		content => template('saio/rsyncd.conf.erb'),
 		owner => root,
 		group => root,
 		mode => 644,
-		notify => Service['rsync']
 	}
 
 	file { '/etc/default/rsync':
@@ -165,11 +175,11 @@ class saio {
 		owner => root,
 		group => root,
 		mode => 644,
-		notify => Service['rsync']
 	}
 
     service { 'rsync':
     	ensure => running,
+    	subscribe => File['/etc/rsyncd.conf'],
     	require => [ 
     			     File['/etc/rsyncd.conf'], 
     				 File['/etc/default/rsync'], 
@@ -193,8 +203,8 @@ class saio {
     file { '/etc/rsyslog.d/10-swift.conf':
     	source => 'puppet:///modules/saio/10-swift.conf',
     	notify => Service['rsyslog'],
-    	group => root,
-    	owner => root,
+    	group => $swiftuser,
+    	owner => $swiftgroup,
     	mode => 644
     }
 
@@ -242,8 +252,8 @@ class saio {
     
     vcsrepo { "/usr/local/src/swift/python-swiftclient":
         ensure   => latest,
-        owner    => vagrant,
-        group    => vagrant,
+        owner    => $swiftuser,
+        group    => $swiftuser,
         provider => git,
         require  => [ Package["git"] ],
         source   => "https://github.com/openstack/python-swiftclient.git",
@@ -252,8 +262,8 @@ class saio {
 
     vcsrepo { "/usr/local/src/swift/swift":
         ensure   => latest,
-        owner    => vagrant,
-        group    => vagrant,
+        owner    => $swiftuser,
+        group    => $swiftuser,
         provider => git,
         require  => [ Package["git"] ],
         source   => "https://github.com/openstack/swift.git",
@@ -299,10 +309,11 @@ class saio {
 
     # XXX fix the user in this file XXX
     file { '/etc/swift/proxy-server.conf':
-    	source => 'puppet:///modules/saio/proxy-server.conf',
+    	#source => 'puppet:///modules/saio/proxy-server.conf',
+    	content => template('saio/proxy-server.conf.erb'),
     	notify => Service['rsyslog'],
-		group => root,
-    	owner => root,
+		group => $swiftuser,
+    	owner => $swiftgroup,
     	mode => 644
     }
 
@@ -310,21 +321,33 @@ class saio {
     file { '/etc/swift/swift.conf':
     	source => 'puppet:///modules/saio/swift.conf',
     	notify => Service['rsyslog'],
-		group => root,
-    	owner => root,
+		group => $swiftuser,
+    	owner => $swiftgroup,
     	mode => 644
     }
 
     # Define trick again to create all 12 server config files
     define create_srv_cfg_files {
   		file { "/etc/swift/object-server/${title}.conf":
-      		source => "puppet:///modules/saio/object-server-${title}.conf"
+      		#source => "puppet:///modules/saio/object-server-${title}.conf",
+      		content => template("saio/object-server-${title}.conf.erb"),
+      		owner => $swiftuser,
+      		group => $swiftgroup,
+      		mode => 644,
   		}
   		file { "/etc/swift/account-server/${title}.conf":
-      		source => "puppet:///modules/saio/account-server-${title}.conf"
+      		#source => "puppet:///modules/saio/account-server-${title}.conf",
+      		content => template("saio/account-server-${title}.conf.erb"),
+      		owner => $swiftuser,
+      		group => $swiftgroup,
+      		mode => 644,
   		}
   		file { "/etc/swift/container-server/${title}.conf":
-      		source => "puppet:///modules/saio/container-server-${title}.conf"
+      		#source => "puppet:///modules/saio/container-server-${title}.conf",
+      		content => template("saio/container-server-${title}.conf.erb"),
+      		owner => $swiftuser,
+      		group => $swiftgroup,
+      		mode => 644,      		
   		}	
 	}
 
@@ -336,29 +359,41 @@ class saio {
 	# Helpful bash scripts
 	#
 
+	# XXX Could be reduced XXX
 	file { '/usr/local/bin/resetswift':
-		source => 'puppet:///modules/saio/resetswift.sh',
-		mode => 755
+		#source => 'puppet:///modules/saio/resetswift.sh',
+		content => template('saio/resetswift.sh.erb'),
+		mode => 755,
+      	owner => $swiftuser,
+      	group => $swiftgroup,
 	}
 
 	file { '/usr/local/bin/remakerings':
 		source => 'puppet:///modules/saio/remakerings.sh',
-		mode => 755
+		mode => 755,
+      	owner => $swiftuser,
+      	group => $swiftgroup,
 	}
 
 	file { '/usr/local/bin/startmain':
 		source => 'puppet:///modules/saio/startmain.sh',
-		mode => 755
+		mode => 755,
+      	owner => $swiftuser,
+      	group => $swiftgroup,
 	}
 
 	file { '/usr/local/bin/startrest':
 		source => 'puppet:///modules/saio/startrest.sh',
-		mode => 755
+		mode => 755,
+      	owner => $swiftuser,
+      	group => $swiftgroup,
 	}
 
 	file { '/usr/local/bin/papply':
 		source => 'puppet:///modules/saio/papply.sh',
-		mode => 755
+		mode => 755,
+      	owner => $swiftuser,
+      	group => $swiftgroup,
 	}
 
 	#
@@ -368,7 +403,9 @@ class saio {
 	# Going to put this into /etc/profile.d instead of trying to add it to the user's .bashrc
 	file { '/etc/profile.d/swift_test.sh':
 		source => 'puppet:///modules/saio/swift_test.sh',
-		mode => 644
+		mode => 644,
+      	owner => $swiftuser,
+      	group => $swiftgroup,
 	}
 
 	$swift_dir = '/usr/local/src/swift/swift'
@@ -387,7 +424,8 @@ class saio {
 		creates => "${swift_dir}/unittests.run",
 		require => [
 					 Exec['install required pip modules'],
-					 File['/etc/swift/test.conf']
+					 File['/etc/swift/test.conf'],
+					 Vcsrepo['/usr/local/src/swift/swift']
 				   ]
 	}
 }

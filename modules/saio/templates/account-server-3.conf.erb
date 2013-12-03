@@ -1,12 +1,12 @@
 [DEFAULT]
-devices = /srv/1/node
+devices = /srv/3/node
 mount_check = false
 disable_fallocate = true
-bind_port = 6012
+bind_port = 6032
 workers = 1
-user = vagrant
-log_facility = LOG_LOCAL2
-recon_cache_path = /var/cache/swift
+user = <%= @swiftuser %>
+log_facility = LOG_LOCAL4
+recon_cache_path = /var/cache/swift3
 eventlet_debug = true
 
 [pipeline:main]

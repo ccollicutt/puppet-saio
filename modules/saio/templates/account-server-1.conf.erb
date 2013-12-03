@@ -2,25 +2,25 @@
 devices = /srv/1/node
 mount_check = false
 disable_fallocate = true
-bind_port = 6010
+bind_port = 6012
 workers = 1
-user = vagrant
+user = <%= @swiftuser %>
 log_facility = LOG_LOCAL2
 recon_cache_path = /var/cache/swift
 eventlet_debug = true
 
 [pipeline:main]
-pipeline = recon object-server
+pipeline = recon account-server
 
-[app:object-server]
-use = egg:swift#object
+[app:account-server]
+use = egg:swift#account
 
 [filter:recon]
 use = egg:swift#recon
 
-[object-replicator]
+[account-replicator]
 vm_test_mode = yes
 
-[object-updater]
+[account-auditor]
 
-[object-auditor]
+[account-reaper]

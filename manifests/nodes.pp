@@ -1,3 +1,6 @@
 node 'precise64' {
-	include 'saio'
+	class { 'saio':
+		swiftuser => curtis,
+		swiftgroup => curtis
+	}
 }
