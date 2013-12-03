@@ -44,10 +44,12 @@ class saio {
     	creates => '/srv/swift-disk',
     }
 
+    # We will accept 1 as a return value, mkfs.xfs won't reformat an existing format
+    # without the -f option, so we are ok here
     exec { 'make xfs file system on sparse disk':
     	command => '/sbin/mkfs.xfs /srv/swift-disk',
     	require => Exec['create sparse disk'],
-    	refreshonly => true,
+    	returns => ['0', '1']
     }
 
     #
@@ -64,7 +66,7 @@ class saio {
 		ensure  => "mounted",
 		options => "loop,noatime,nodiratime,nobarrier,logbufs=8",
         atboot  => "true",
-        require => [ File['/mnt/sdb1'],
+        require => [ 
         			 Exec['make xfs file system on sparse disk']
         		   ]
     }
