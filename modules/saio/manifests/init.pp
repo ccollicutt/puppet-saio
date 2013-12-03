@@ -5,7 +5,8 @@ class saio {
 	# See: http://docs.openstack.org/developer/swift/development_saio.html
 	#
 
-	package { ['curl',
+	package { [
+			   'curl',
 			   'gcc', 
 			   'memcached',
 			   'rsync',
@@ -25,7 +26,8 @@ class saio {
 			   'python-netifaces', 
 			   'python-pip',
 			   'python-dnspython',
-			   'python-mock' ]:
+			   'python-mock' 
+			  ]:
 
 		ensure => installed,
 	}
@@ -99,7 +101,8 @@ class saio {
 	# - Note that the parent directories have to exist too otherwise puppet will fail
 	#
 
-	$server_dirs = ['/etc/swift', 
+	$server_dirs = [
+				   '/etc/swift', 
 				   '/etc/swift/object-server', 
 				   '/etc/swift/container-server', 
 				   '/etc/swift/account-server', 
@@ -119,11 +122,12 @@ class saio {
 		owner => vagrant,
 		group => vagrant,
 		mode => 644,
-		require => [ File['/srv/1'],
-				     File['/srv/2'],
-				     File['/srv/3'],
-				     File['/srv/4'],
-				    ]
+		require => [ 
+					File['/srv/1'],
+				    File['/srv/2'],
+				    File['/srv/3'],
+				    File['/srv/4'],
+				   ]
 	}
 
 
@@ -161,10 +165,11 @@ class saio {
 
     service { 'rsync':
     	ensure => running,
-    	require => [ File['/etc/rsyncd.conf'], 
+    	require => [ 
+    			     File['/etc/rsyncd.conf'], 
     				 File['/etc/default/rsync'], 
     				 Package['rsync']
-    			    ],
+    			   ],
     }
 
     #
@@ -231,8 +236,8 @@ class saio {
     
     vcsrepo { "/usr/local/src/swift/python-swiftclient":
         ensure   => latest,
-        owner    => $owner,
-        group    => $owner,
+        owner    => vagrant,
+        group    => vagrant,
         provider => git,
         require  => [ Package["git"] ],
         source   => "https://github.com/openstack/python-swiftclient.git",
@@ -241,8 +246,8 @@ class saio {
 
     vcsrepo { "/usr/local/src/swift/swift":
         ensure   => latest,
-        owner    => $owner,
-        group    => $owner,
+        owner    => vagrant,
+        group    => vagrant,
         provider => git,
         require  => [ Package["git"] ],
         source   => "https://github.com/openstack/swift.git",
@@ -328,5 +333,31 @@ class saio {
 
 	}
 
+	file { '/usr/local/bin/startmain':
+		source => 'puppet:///modules/saio/startmain.sh',
+		mode => 755
 
+	}
+
+	file { '/usr/local/bin/startrest':
+		source => 'puppet:///modules/saio/startrest.sh',
+		mode => 755
+
+	}
+
+	#
+	# Setup test environment
+	# 
+
+	# Going to put this into /etc/profile.d instead of trying to add it to the user's .bashrc
+	file { '/etc/profile.d/swift_test.sh':
+		source => 'puppet:///modules/saio/swift_test.sh',
+		mode => 644
+
+	}
+
+	file { '/etc/swift/test.conf':
+		ensure => link,
+		target => '/usr/local/src/swift/swift/test/sample.conf'
+	}
 }
