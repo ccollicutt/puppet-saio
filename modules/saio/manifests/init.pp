@@ -5,9 +5,10 @@ class saio {
 	# See: http://docs.openstack.org/developer/swift/development_saio.html
 	#
 
-	# XXX must be a better way XXX
-	exec {'apt-get update':
-		command => '/usr/bin/apt-get update'
+	# only run if needed
+	exec { "apt-get update":
+		command => "/usr/bin/apt-get update",
+		onlyif => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | /bin/grep . > /dev/null'",
 	}
 
 	package { [
