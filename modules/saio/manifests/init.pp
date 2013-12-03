@@ -47,7 +47,7 @@ class saio {
     }
 
     # We will accept 1 as a return value, mkfs.xfs won't reformat an existing format
-    # without the -f option, so we are ok here
+    # without the -f option, so it's ok to keep running it
     exec { 'make xfs file system on sparse disk':
     	command => '/sbin/mkfs.xfs /srv/swift-disk',
     	require => Exec['create sparse disk'],
@@ -181,7 +181,7 @@ class saio {
     }
 
     #
-    # logging
+    # Setup logging and rsyslogd
     #
 
     file { '/etc/rsyslog.d/10-swift.conf':
@@ -222,7 +222,7 @@ class saio {
     }
 
     #
-    # Download and build source
+    # Download and build python-swiftclient and swift source
     # 
 
     package { 'git':
@@ -255,7 +255,7 @@ class saio {
     }
 
     #
-    # Build...
+    # Build python-swiftclient and swift
     # 
 
     exec {'build python-swiftclient':
@@ -272,7 +272,8 @@ class saio {
 
     #
     # Pip requirements
-    # - maybe there is a puppet resource for this?
+    # - maybe there is a puppet resource for pip?
+    #
 
     exec {'install required pip modules':
     	cwd => '/usr/local/src/swift/swift',
@@ -280,7 +281,7 @@ class saio {
     }
 
     #
-    # Configuration files
+    # Swift server configuration files
     # 
 
     # XXX fix the user in this file XXX
@@ -301,6 +302,7 @@ class saio {
     	mode => 644
     }
 
+    # Define trick again to create all 12 server config files
     define create_srv_cfg_files {
   		file { "/etc/swift/object-server/${title}.conf":
       		source => "puppet:///modules/saio/object-server-${title}.conf"
@@ -353,11 +355,24 @@ class saio {
 	file { '/etc/profile.d/swift_test.sh':
 		source => 'puppet:///modules/saio/swift_test.sh',
 		mode => 644
-
 	}
+
+	$swift_dir = '/usr/local/src/swift/swift'
 
 	file { '/etc/swift/test.conf':
 		ensure => link,
-		target => '/usr/local/src/swift/swift/test/sample.conf'
+		target => "${swift_dir}/test/sample.conf"
+	}
+
+	# Run the unittests once
+	# - note setting the environment variable just in case, is also in swift_test.sh
+	exec { "${swift_dir}/.unittests":
+		environment => "SWIFT_TEST_CONFIG_FILE=/etc/swift/test.conf",
+		command => "${swift_dir}/.unittests && touch ${swift_dir}/unittests.run",
+		creates => "${swift_dir}/unittests.run",
+		require => [
+					 Exec['install required pip modules'],
+					 File['/etc/swift/test.conf']
+				   ]
 	}
 }
