@@ -5,6 +5,11 @@ class saio {
 	# See: http://docs.openstack.org/developer/swift/development_saio.html
 	#
 
+	# XXX must be a better way XXX
+	exec {'apt-get update':
+		command => '/usr/bin/apt-get update'
+	}
+
 	package { [
 			   'curl',
 			   'gcc', 
@@ -30,6 +35,7 @@ class saio {
 			  ]:
 
 		ensure => installed,
+		require => Exec['apt-get update']
 	}
 
 	#
@@ -69,7 +75,8 @@ class saio {
 		options => "loop,noatime,nodiratime,nobarrier,logbufs=8",
         atboot  => "true",
         require => [ 
-        			 Exec['make xfs file system on sparse disk']
+        			 Exec['make xfs file system on sparse disk'],
+        			 File['/mnt/sdb1']
         		   ]
     }
 
@@ -80,7 +87,6 @@ class saio {
 
     define create_srv_mnt_points {
     	file { "/mnt/sdb1/${title}":
-    		#path => "/mnt/sdb1/${title}""
     		ensure => directory,
     	}
   		file { "/srv/${title}":
@@ -177,7 +183,8 @@ class saio {
     #
 
     service { 'memcached':
-    	ensure => 'running'
+    	ensure => 'running',
+    	require => [ Package['memcached'], Exec['apt-get update'] ]
     }
 
     #
@@ -262,22 +269,29 @@ class saio {
     	cwd => '/usr/local/src/swift/python-swiftclient',
     	command => '/usr/bin/python setup.py develop',
     	creates => '/usr/local/bin/swift',
+    	require => Vcsrepo['/usr/local/src/swift/python-swiftclient']
     }
 
     exec {'build swift':
     	cwd => '/usr/local/src/swift/swift',
     	command => '/usr/bin/python setup.py develop',
     	creates => '/usr/local/bin/swift-ring-builder',
+    	require => Vcsrepo['/usr/local/src/swift/swift']
     }
 
     #
-    # Pip requirements
+    # pip requirements
     # - maybe there is a puppet resource for pip?
     #
 
     exec {'install required pip modules':
     	cwd => '/usr/local/src/swift/swift',
-    	command => '/usr/bin/pip install -r test-requirements.txt'
+    	command => '/usr/bin/pip install -r test-requirements.txt',
+    	require => [ 
+    				 Package['python-pip'], 
+    				 Exec['apt-get update'], 
+    				 Vcsrepo['/usr/local/src/swift/swift'] 
+    			   ]
     }
 
     #
@@ -326,25 +340,26 @@ class saio {
 	file { '/usr/local/bin/resetswift':
 		source => 'puppet:///modules/saio/resetswift.sh',
 		mode => 755
-
 	}
 
 	file { '/usr/local/bin/remakerings':
 		source => 'puppet:///modules/saio/remakerings.sh',
 		mode => 755
-
 	}
 
 	file { '/usr/local/bin/startmain':
 		source => 'puppet:///modules/saio/startmain.sh',
 		mode => 755
-
 	}
 
 	file { '/usr/local/bin/startrest':
 		source => 'puppet:///modules/saio/startrest.sh',
 		mode => 755
+	}
 
+	file { '/usr/local/bin/papply':
+		source => 'puppet:///modules/saio/papply.sh',
+		mode => 755
 	}
 
 	#
@@ -359,6 +374,7 @@ class saio {
 
 	$swift_dir = '/usr/local/src/swift/swift'
 
+	# Just make this a link instead of copying
 	file { '/etc/swift/test.conf':
 		ensure => link,
 		target => "${swift_dir}/test/sample.conf"
