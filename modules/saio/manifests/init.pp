@@ -64,7 +64,9 @@ class saio {
 		ensure  => "mounted",
 		options => "loop,noatime,nodiratime,nobarrier,logbufs=8",
         atboot  => "true",
-        require => File['/mnt/sdb1'],
+        require => [ File['/mnt/sdb1'],
+        			 Exec['make xfs file system on sparse disk']
+        		   ]
     }
 
     # 
@@ -73,16 +75,22 @@ class saio {
     #
 
     define create_srv_mnt_points {
+    	file { "/mnt/sdb1/${title}":
+    		#path => "/mnt/sdb1/${title}""
+    		ensure => directory,
+    	}
   		file { "/srv/${title}":
       		ensure => link,
      		target => "/mnt/sdb1/${title}",
-    		require => File["/mnt/sdb1"]
+    		require => File["/mnt/sdb1/${title}"]
   		}
 	}
 
 	$srv_mnt_points = ['1','2','3','4']
 
-	create_srv_mnt_points { $srv_mnt_points: }
+	create_srv_mnt_points { $srv_mnt_points: 
+		require => Mount['/mnt/sdb1'],
+	}
 
 	# 
 	# More directories...
@@ -92,7 +100,7 @@ class saio {
 	$server_dirs = ['/etc/swift', 
 				   '/etc/swift/object-server', 
 				   '/etc/swift/container-server', 
-				   '/etc/swift/account-server ', 
+				   '/etc/swift/account-server', 
 				   '/srv/1/node',
 				   '/srv/2/node',
 				   '/srv/3/node',
@@ -118,7 +126,8 @@ class saio {
 
 
 	#
-	# Note that this is probably not the best way to do this
+	# rc.local
+	# - note that this is probably not the best way to do this
 	# 
 
 	file { '/etc/rc.local':
@@ -140,7 +149,6 @@ class saio {
 		notify => Service['rsync']
 	}
 
-	# Configure rsyncd to start 
 	file { '/etc/default/rsync':
 		source => 'puppet:///modules/saio/default_rsync',
 		owner => root,
@@ -155,7 +163,6 @@ class saio {
     				 File['/etc/default/rsync'], 
     				 Package['rsync']
     			    ],
-
     }
 
     #
@@ -206,6 +213,118 @@ class saio {
     	mode => 755,
     	notify => Service['rsyslog']
     }
+
+    #
+    # Download and build source
+    # 
+
+    package { 'git':
+        ensure => installed,
+    }
+
+    file {'/usr/local/src/swift':
+    	ensure => directory,
+    	mode => 777
+    }
+    
+    vcsrepo { "/usr/local/src/swift/python-swiftclient":
+        ensure   => latest,
+        owner    => $owner,
+        group    => $owner,
+        provider => git,
+        require  => [ Package["git"] ],
+        source   => "https://github.com/openstack/python-swiftclient.git",
+        revision => 'master',
+    }
+
+    vcsrepo { "/usr/local/src/swift/swift":
+        ensure   => latest,
+        owner    => $owner,
+        group    => $owner,
+        provider => git,
+        require  => [ Package["git"] ],
+        source   => "https://github.com/openstack/swift.git",
+        revision => 'master',
+    }
+
+    #
+    # Build...
+    # 
+
+    exec {'build python-swiftclient':
+    	cwd => '/usr/local/src/swift/python-swiftclient',
+    	command => '/usr/bin/python setup.py develop',
+    	creates => '/usr/local/bin/swift',
+    }
+
+    exec {'build swift':
+    	cwd => '/usr/local/src/swift/swift',
+    	command => '/usr/bin/python setup.py develop',
+    	creates => '/usr/local/bin/swift-ring-builder',
+    }
+
+    #
+    # Pip requirements
+    # - maybe there is a puppet resource for this?
+
+    exec {'install required pip modules':
+    	cwd => '/usr/local/src/swift/swift',
+    	command => '/usr/bin/pip install -r test-requirements.txt'
+    }
+
+    #
+    # Configuration files
+    # 
+
+    # XXX fix the user in this file XXX
+    file { '/etc/swift/proxy-server.conf':
+    	source => 'puppet:///modules/saio/proxy-server.conf',
+    	notify => Service['rsyslog'],
+		group => root,
+    	owner => root,
+    	mode => 644
+    }
+
+    # XXX fix the hashes to be variables XXX
+    file { '/etc/swift/swift.conf':
+    	source => 'puppet:///modules/saio/swift.conf',
+    	notify => Service['rsyslog'],
+		group => root,
+    	owner => root,
+    	mode => 644
+    }
+
+    define create_srv_cfg_files {
+  		file { "/etc/swift/object-server/${title}.conf":
+      		source => "puppet:///modules/saio/object-server-${title}.conf"
+  		}
+  		file { "/etc/swift/account-server/${title}.conf":
+      		source => "puppet:///modules/saio/account-server-${title}.conf"
+  		}
+  		file { "/etc/swift/container-server/${title}.conf":
+      		source => "puppet:///modules/saio/container-server-${title}.conf"
+  		}	
+	}
+
+	$swift_srvs = ['1','2','3','4']
+
+	create_srv_cfg_files { $swift_srvs: }
+
+	#
+	# Helpful bash scripts
+	#
+
+	file { '/usr/local/bin/resetswift':
+		source => 'puppet:///modules/saio/resetswift.sh',
+		mode => 755
+
+	}
+
+	file { '/usr/local/bin/remakerings':
+		source => 'puppet:///modules/saio/remakerings.sh',
+		mode => 755
+
+	}
 
 
 }
