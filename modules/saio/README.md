@@ -15,7 +15,7 @@
 
 ##Overview
 
-This module will install [OpenStack Swift All-in-one](http://docs.openstack.org/developer/swift/development_saio.html) (SAIO) on a single server. Currently the instuctions for Swift-all-in-one list commands and files to copy and paste. This module automates running those commands and copying the files to install Swift-all-in-one quickly.
+This module will install [OpenStack Swift All-in-one](http://docs.openstack.org/developer/swift/development_saio.html) (SAIO) on a single server. Currently the instuctions for Swift-all-in-one list commands and files to copy and paste. This module automates running those commands and copying the files to install Swift-all-in-one quickly using Puppet.
 
 Ideally it would be used with [Vagrant](http://vagrantup.com) as a place to develop and test OpenStack Swift, but without requiring multiple instances of Ubuntu 12.04 on which to run Swift. Instead all services run on one instance.     
 
@@ -23,7 +23,7 @@ Ideally it would be used with [Vagrant](http://vagrantup.com) as a place to deve
 
 ###What SAIO affects
 
-This module will install many packages and services, so we are expecting that it would be used as part of a virtualized environment which can be built and destroyed many times over, ala [Vagrant](http://vagrantup.com).
+This module will install many packages and services, so we are expecting that it would be used as part of a local virtualized development environment which can be built and destroyed many times over, ala [Vagrant](http://vagrantup.com).
 
 Some of the things it affects:
 
@@ -52,9 +52,10 @@ node 'precise64' {
 	}
 }
 ```
-Note that is no swiftuser or swiftgroup is provided the vagrant user and group will be used.
 
-Optionally add a user and group (which must exist already):
+Note that if no swiftuser or swiftgroup is provided the vagrant user and group will be used as default.
+
+Optionally add a user and group (which must exist already on the server):
 
 ```
 node 'precise64' {
@@ -120,7 +121,7 @@ swift.txt
 
 ##Limitations
 
-* Ubuntu 12.04
+* Only works on Ubuntu 12.04
 
 ##Development
 
