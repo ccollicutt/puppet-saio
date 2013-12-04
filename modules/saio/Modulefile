@@ -1,5 +1,5 @@
 name 'serverascode-saio'
-version '0.0.2'
+version '0.0.4'
 dependency 'puppetlabs/vcsrepo'
 summary "Deploy OpenStack Swift-all-in-one"
 description 'Deploys OpenStack Swift with all services running on a single server for development and testing.'

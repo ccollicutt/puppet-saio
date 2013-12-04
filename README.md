@@ -85,6 +85,8 @@ Starting object-server...(/etc/swift/object-server/3.conf)
 Starting object-server...(/etc/swift/object-server/4.conf)
 ```
 
+At this point it's best to look at the official [Swift all-in-one](http://docs.openstack.org/developer/swift/development_saio.html) documentation as to the next steps, or if you are a Swift developer you probalby know what you need to do next. :)
+
 ## Puppet
 
 ### shell inline

@@ -7,3 +7,4 @@ TODO
 * use hiera?
 * add ability to point to apt-cache-ng server
 * figure out puppet best practices
+* rebuild swift/swiftclient when new code is pulled in by vcsrepo

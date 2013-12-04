@@ -133,11 +133,11 @@ class saio (
     group   => $swiftuser,
     mode    => 644,
     require => [ 
-          File['/srv/1'],
-            File['/srv/2'],
-            File['/srv/3'],
-            File['/srv/4'],
-           ]
+                 File['/srv/1'],
+                 File['/srv/2'],
+                 File['/srv/3'],
+                 File['/srv/4'],
+               ]
   }
 
 
