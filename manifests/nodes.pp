@@ -1,6 +1,6 @@
 node 'precise64' {
 	class { 'saio':
-		swiftuser => curtis,
-		swiftgroup => curtis
+		#swiftuser => curtis,
+		#swiftgroup => curtis
 	}
 }

@@ -5,17 +5,6 @@ class saio ( $swiftuser='vagrant', $swiftgroup='vagrant' ) {
   # See: http://docs.openstack.org/developer/swift/development_saio.html
   #
 
-  # But first lets make sure the swiftuser/group exist
-  group { $swiftgroup:
-        ensure => present,
-  }
-  user { $swiftuser:
-        ensure     => present,
-        membership => minimum,
-        shell      => "/bin/bash",
-        require    => Group["$swiftgroup"]
-  }
-
   # only run if needed
   exec { "apt-get update":
     command => "/usr/bin/apt-get update",
@@ -255,7 +244,9 @@ class saio ( $swiftuser='vagrant', $swiftgroup='vagrant' ) {
     owner    => $swiftuser,
     group    => $swiftuser,
     provider => git,
-    require  => [ Package["git"] ],
+    require  => [ 
+                  Package["git"], 
+                ],
     source   => "https://github.com/openstack/python-swiftclient.git",
     revision => 'master',
   }
@@ -265,7 +256,9 @@ class saio ( $swiftuser='vagrant', $swiftgroup='vagrant' ) {
     owner    => $swiftuser,
     group    => $swiftuser,
     provider => git,
-    require  => [ Package["git"] ],
+    require  => [ 
+                  Package["git"], 
+                ],
     source   => "https://github.com/openstack/swift.git",
     revision => 'master',
   }
@@ -278,7 +271,7 @@ class saio ( $swiftuser='vagrant', $swiftgroup='vagrant' ) {
     cwd => '/usr/local/src/swift/python-swiftclient',
     command => '/usr/bin/python setup.py develop',
     creates => '/usr/local/bin/swift',
-    require => Vcsrepo['/usr/local/src/swift/python-swiftclient']
+    require => Vcsrepo['/usr/local/src/swift/python-swiftclient'],
   }
 
   exec {'build swift':
@@ -299,7 +292,7 @@ class saio ( $swiftuser='vagrant', $swiftgroup='vagrant' ) {
     require => [ 
                  Package['python-pip'], 
                  Exec['apt-get update'], 
-                 Vcsrepo['/usr/local/src/swift/swift'] 
+                 Vcsrepo['/usr/local/src/swift/swift']
                 ]
   }
 
