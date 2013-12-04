@@ -2,7 +2,7 @@
 
 This repository contains the code to deploy [OpenStack Swift All-in-one](http://docs.openstack.org/developer/swift/development_saio.html) (SAIO) using Puppet.
 
-This puppet module is also located on [Puppet Forge](https://forge.puppetlabs.com/serverascode/saio).
+This module is also on [Puppet Forge](https://forge.puppetlabs.com/serverascode/saio).
 
 ##Using
 
@@ -13,7 +13,7 @@ $ git clone git@github.com:curtisgithub/puppet-saio.git
 $ vagrant up
 ```
 
-and have OpenStack Swift deployed from source, either the offical repositories or your own repo. Any more than that is a bug, so please feel free to let me know if it doesn't work as expected.
+and have OpenStack Swift deployed from source, either the official repositories or your own repo. Any more than that is a bug, so please feel free to let me know if it doesn't work as expected.
 
 ###Parameters
 
@@ -85,13 +85,13 @@ Starting object-server...(/etc/swift/object-server/3.conf)
 Starting object-server...(/etc/swift/object-server/4.conf)
 ```
 
-At this point it's best to look at the official [Swift all-in-one](http://docs.openstack.org/developer/swift/development_saio.html) documentation as to the next steps, or if you are a Swift developer you probalby know what you need to do next. :)
+At this point it's best to look at the official [Swift all-in-one](http://docs.openstack.org/developer/swift/development_saio.html) documentation as to the next steps, or if you are a Swift developer you probably know what you need to do next. :)
 
 ## Puppet
 
 ### shell inline
 
-In the Vagrant file the puppet.sh script is run, and also a couple of inline shell commands, one of which installs [vcsrepo](https://forge.puppetlabs.com/puppetlabs/vcsrepo) which is a dependancy of puppet-saio.
+In the Vagrant file the puppet.sh script is run, and also a couple of inline shell commands, one of which installs [vcsrepo](https://forge.puppetlabs.com/puppetlabs/vcsrepo) which is a dependency of puppet-saio.
 
 ### puppet.sh
 
