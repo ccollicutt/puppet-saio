@@ -6,7 +6,6 @@
 2. [Module Description - What the module does and why it is useful](#module-description)
 3. [Setup - The basics of getting started with SAIO](#setup)
     * [What SAIO affects](#what-saio-affects)
-    * [Setup requirements](#setup-requirements)
     * [Beginning with SAIO](#beginning-with-saio)
 4. [Usage - Configuration options and additional functionality](#usage)
 5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
@@ -60,15 +59,29 @@ Optionally add a user and group (which must exist already on the server):
 ```
 node 'precise64' {
 	class { 'saio':
-		swiftuser => curtis,
+		swiftuser  => curtis,
 		swiftgroup => curtis
+	}
+}
+```
+
+Also swiftclient and swift repos can be added as well:
+
+
+```
+node 'precise64' {
+	class { 'saio':
+		swiftuser        => curtis,
+		swiftgroup       => curtis,
+		swiftclient_repo => "https://github.com/someuser/someswiftclient_repo",
+		swift_repo       => "https://github.com/someuser/someswift_repo"
 	}
 }
 ```
 
 ### Post puppet
 
-Once puppet has run its course, you can now use the bash scripts to generate the ring files and (hopefull) startup Swift.
+Once the puppet install has run its course, you can now use the bash scripts to generate the ring files and (hopefull) startup Swift.
 
 ```
 vagrant@precise64:/etc/puppet$ remakerings 
