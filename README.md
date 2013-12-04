@@ -11,8 +11,6 @@ The idea of this repository is to check it out and run vagrant up:
 ```
 $ git clone git@github.com:curtisgithub/puppet-saio.git
 $ vagrant up
-$ vagrant ssh
-# do some work with Swift
 ```
 
-and have OpenStack Swift deployed. Any more than that is a bug, so please feel free to let me know if it doesn't work as expected.
+and have OpenStack Swift deployed from source, either the offical repositories or your own repo. Any more than that is a bug, so please feel free to let me know if it doesn't work as expected.
