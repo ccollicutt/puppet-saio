@@ -250,7 +250,8 @@ class saio (
     group    => $swiftuser,
     provider => git,
     require  => [ 
-                  Package["git"], 
+                  Package["git"],
+                  File['/usr/local/src/swift'] 
                 ],
     source   => $swiftclient_repo,
     revision => 'master',
@@ -262,7 +263,8 @@ class saio (
     group    => $swiftuser,
     provider => git,
     require  => [ 
-                  Package["git"], 
+                  Package["git"],
+                  File['/usr/local/src/swift']  
                 ],
     source   => $swift_repo,
     revision => 'master',

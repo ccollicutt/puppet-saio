@@ -26,7 +26,4 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     puppet.options = "--user vagrant"
   end
 
-  config.vm.provision :shell, :path => 'puppet.sh'
-  #config.vm.provision :puppet
-
 end
