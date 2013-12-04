@@ -15,13 +15,9 @@
 
 ##Overview
 
-This module will install OpenStack Swift All-in-one (SAIO) on a single server. Currently the instuctions for Swift-all-in-one list commands and files to copy and paste. This module automates running those commands and copying the files to install Swift-all-in-one quickly.
+This module will install [OpenStack Swift All-in-one](http://docs.openstack.org/developer/swift/development_saio.html) (SAIO) on a single server. Currently the instuctions for Swift-all-in-one list commands and files to copy and paste. This module automates running those commands and copying the files to install Swift-all-in-one quickly.
 
 Ideally it would be used with [Vagrant](http://vagrantup.com) as a place to develop and test OpenStack Swift, but without requiring multiple instances of Ubuntu 12.04 on which to run Swift. Instead all services run on one instance.     
-
-##Module Description
-
-This module installs all the configuration files and services needed to run OpenStack Swift on a single server, also known as [OpenStack Swift All-in-one](http://docs.openstack.org/developer/swift/development_saio.html).
 
 ##Setup
 
