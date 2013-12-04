@@ -117,8 +117,6 @@ vagrant@precise64:~$ swift -A http://127.0.0.1:8080/auth/v1.0 -U test:tester -K 
 swift.txt
 ```
 
-##Usage
-
 ##Limitations
 
 * Ubuntu 12.04
