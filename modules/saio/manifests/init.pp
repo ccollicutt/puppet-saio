@@ -2,13 +2,25 @@ class saio (
   $swiftuser='vagrant', 
   $swiftgroup='vagrant',
   $swiftclient_repo='https://github.com/openstack/python-swiftclient.git',
-  $swift_repo='https://github.com/openstack/swift.git'
+  $swift_repo='https://github.com/openstack/swift.git',
+  $package_cache_srv=undef,
   ) {
   
   #
   # Install OpenStack Swift exactly the way the Swift All In One document describes
   # See: http://docs.openstack.org/developer/swift/development_saio.html
   #
+
+  # If a package_cache_srv, ie. apt-cache-ng server IP is supplied, add then install a proxy config file for apt.
+  if $package_cache_srv {
+    file { '/etc/apt/apt.conf.d/01proxy':
+      content => template('saio/01proxy.erb'),
+      owner   => root,
+      group   => root,
+      mode    => '0644'
+    }
+
+  }
 
   # only run if needed
   exec { "apt-get update":
