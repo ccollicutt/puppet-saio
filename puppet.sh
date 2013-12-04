@@ -13,3 +13,6 @@ sudo apt-get install -y puppet
 
 # Vagrant sets up it's own path which includes puppet 2.7.x which I don't want
 sudo rm -f /etc/profile.d/vagrant_ruby.sh
+
+
+
