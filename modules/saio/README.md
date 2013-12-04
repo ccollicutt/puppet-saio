@@ -86,6 +86,11 @@ Device d1r1z2-127.0.0.1:6022R127.0.0.1:6022/sdb2_"" with 1.0 weight got id 1
 Device d2r1z3-127.0.0.1:6032R127.0.0.1:6032/sdb3_"" with 1.0 weight got id 2
 Device d3r1z4-127.0.0.1:6042R127.0.0.1:6042/sdb4_"" with 1.0 weight got id 3
 Reassigned 1024 (100.00%) partitions. Balance is now 0.00.
+```
+
+Now all the Swift servers can be started:
+
+```
 vagrant@precise64:/etc/puppet$ startmain 
 WARNING: Unable to increase file descriptor limit.  Running as non-root?
 Starting proxy-server...(/etc/swift/proxy-server.conf)
