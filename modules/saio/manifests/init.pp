@@ -1,4 +1,9 @@
-class saio ( $swiftuser='vagrant', $swiftgroup='vagrant' ) {
+class saio ( 
+  $swiftuser='vagrant', 
+  $swiftgroup='vagrant',
+  $swiftclient_repo='https://github.com/openstack/python-swiftclient.git',
+  $swift_repo='https://github.com/openstack/swift.git'
+  ) {
   
   #
   # Install OpenStack Swift exactly the way the Swift All In One document describes
@@ -247,7 +252,7 @@ class saio ( $swiftuser='vagrant', $swiftgroup='vagrant' ) {
     require  => [ 
                   Package["git"], 
                 ],
-    source   => "https://github.com/openstack/python-swiftclient.git",
+    source   => $swiftclient_repo,
     revision => 'master',
   }
 
@@ -259,7 +264,7 @@ class saio ( $swiftuser='vagrant', $swiftgroup='vagrant' ) {
     require  => [ 
                   Package["git"], 
                 ],
-    source   => "https://github.com/openstack/swift.git",
+    source   => $swift_repo,
     revision => 'master',
   }
 
