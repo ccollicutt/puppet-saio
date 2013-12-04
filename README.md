@@ -6,7 +6,7 @@ This puppet module is also located on [Puppet Forge](https://forge.puppetlabs.co
 
 ##Using
 
-The idea of this repository is to check it out and then simploy run:
+The idea of this repository is to check it out and run vagrant up:
 
 ```
 $ git clone git@github.com:curtisgithub/puppet-saio.git
