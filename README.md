@@ -1,6 +1,6 @@
 #Puppet SAIO - Deploy OpenStack Swift all-in-one
 
-This repository contains the code to deploy OpenStack Swift All-in-one](http://docs.openstack.org/developer/swift/development_saio.html) (SAIO) using Puppet.
+This repository contains the code to deploy [OpenStack Swift All-in-one](http://docs.openstack.org/developer/swift/development_saio.html) (SAIO) using Puppet.
 
 This puppet module is also located on [Puppet Forge](https://forge.puppetlabs.com/serverascode/saio).
 
