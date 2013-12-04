@@ -80,7 +80,7 @@ node 'precise64' {
 
 ### Post puppet
 
-Once the puppet install has run its course, you can now use the bash scripts to generate the ring files and (hopefull) startup Swift.
+Once the puppet install has run its course, you can now use the bash scripts to generate the ring files and (hopefully) startup Swift.
 
 ```
 vagrant@precise64:/etc/puppet$ remakerings 
