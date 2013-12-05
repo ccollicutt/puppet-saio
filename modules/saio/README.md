@@ -6,16 +6,15 @@
 2. [Setup - The basics of getting started with SAIO](#setup)
     * [What SAIO affects](#what-saio-affects)
     * [Beginning with SAIO](#beginning-with-saio)
-3. [Usage - Configuration options and additional functionality](#usage)
-4. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
-5. [Limitations - OS compatibility, etc.](#limitations)
-6. [Development - Guide for contributing to the module](#development)
+3. [After Puppet has run](#post-puppet)
+4. [Limitations - OS compatibility, etc.](#limitations)
+5. [Development - Guide for contributing to the module](#development)
 
 ##Overview
 
-This module will install [OpenStack Swift All-in-one](http://docs.openstack.org/developer/swift/development_saio.html) (SAIO) on a single server. Currently the instuctions for Swift-all-in-one list commands and files to copy and paste. This module automates running those commands and copying the files to install Swift-all-in-one quickly using Puppet.
+This module will install [OpenStack Swift All-in-one](http://docs.openstack.org/developer/swift/development_saio.html) (SAIO) on a single server. Currently the instructions for Swift-all-in-one list commands and files to copy and paste. This module automates running those commands and copying the files to install Swift-all-in-one quickly using Puppet.
 
-Ideally it would be used with [Vagrant](http://vagrantup.com) as a place to develop and test OpenStack Swift, but without requiring multiple instances of Ubuntu 12.04 on which to run Swift. Instead all services run on one instance.     
+Ideally it would be used with [Vagrant](http://vagrantup.com) as a place to develop and test OpenStack Swift, but without requiring multiple instances of Ubuntu 12.04 on which to run it. Instead all services run on one instance.
 
 ##Setup
 
@@ -51,32 +50,17 @@ node 'precise64' {
 }
 ```
 
-Note that if no swiftuser or swiftgroup is provided the vagrant user and group will be used as default.
-
-Optionally add a user and group (which must exist already on the server):
+There are a few optional parameters. Below are their defaults:
 
 ```
-node 'precise64' {
-	class { 'saio':
-		swiftuser  => curtis,
-		swiftgroup => curtis
-	}
-}
+$swiftuser='vagrant', 
+$swiftgroup='vagrant',
+$swiftclient_repo='https://github.com/openstack/python-swiftclient.git',
+$swift_repo='https://github.com/openstack/swift.git',
+$package_cache_srv=undef,
 ```
 
-Also swiftclient and swift repos can be added as well:
-
-
-```
-node 'precise64' {
-	class { 'saio':
-		swiftuser        => curtis,
-		swiftgroup       => curtis,
-		swiftclient_repo => "https://github.com/someuser/someswiftclient_repo",
-		swift_repo       => "https://github.com/someuser/someswift_repo"
-	}
-}
-```
+The package_cache_srv is a apt-cache-ng server's IP address. Usually I have a local vm running apt-cache-ng which  projects like SAIO use to grab packages from instead of having to download them from the Internet every single time.
 
 ### Post puppet
 
@@ -137,7 +121,5 @@ swift.txt
 
 ##Development
 
-There are no groundrules for contributing other than using github pull requests.
-
-The github repository for this module can be found [here](http://github.com/curtisgithub/puppet-saio).
+The github repository for this module can be found [here](http://github.com/curtisgithub/puppet-saio) so feel free to send a pull request. :)
 
