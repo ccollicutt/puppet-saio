@@ -1,17 +1,59 @@
-class saio ( 
-  $swiftuser='vagrant', 
+# == Class: saio
+#
+# Deploy OpenStack Swift All-in-one
+#
+# === Parameters
+#
+# Document parameters here.
+#
+# [*swiftuser*]
+#   Set the user the swift files and processes are going to be owned by.
+#
+# [*swiftgroup*]
+#   Set the group the swift files and processes are going to be owned by.
+#
+# [*swiftclient_repo*]
+#   The git repository the swiftclient code resides in.
+#
+# [*swift_repo*]
+#   The git repository the swift code resides in.
+#
+# [*package_cache_srv*]
+#   The IP address of a local apt-cache-ng server to use to download
+#   apt packages from.
+#
+# === Variables
+#
+# None
+#
+# === Examples
+#
+#  class { 'saio':
+#  }
+#
+# === Authors
+#
+# Curtis <curtis@serverascode.com>
+#
+# === Copyright
+#
+# Copyright 2013
+#
+class saio (
+  $swiftuser='vagrant',
   $swiftgroup='vagrant',
   $swiftclient_repo='https://github.com/openstack/python-swiftclient.git',
   $swift_repo='https://github.com/openstack/swift.git',
   $package_cache_srv=undef,
   ) {
-  
+
   #
-  # Install OpenStack Swift exactly the way the Swift All In One document describes
+  # Install OpenStack Swift exactly the way Swift All In One describes
   # See: http://docs.openstack.org/developer/swift/development_saio.html
   #
 
-  # If a package_cache_srv, ie. apt-cache-ng server IP is supplied, add then install a proxy config file for apt.
+  # If a package_cache_srv, ie. apt-cache-ng server IP is supplied,
+  # add then install a proxy config file for apt.
   if $package_cache_srv {
     file { '/etc/apt/apt.conf.d/01proxy':
       content => template('saio/01proxy.erb'),
@@ -23,15 +65,17 @@ class saio (
   }
 
   # only run if needed
-  exec { "apt-get update":
-    command => "/usr/bin/apt-get update",
-    onlyif  => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | /bin/grep . > /dev/null'",
+  exec { 'apt-get update':
+    command => '/usr/bin/apt-get update',
+    onlyif  => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || \
+    /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | \
+    /bin/grep . > /dev/null'",
   }
 
   # now start installing as per instructions...
   package { [
          'curl',
-         'gcc', 
+         'gcc',
          'memcached',
          'rsync',
          'sqlite3',
@@ -43,17 +87,17 @@ class saio (
          'python-dev',
          'python-nose',
          'python-simplejson',
-         'python-xattr', 
+         'python-xattr',
          'python-eventlet',
-         'python-greenlet', 
-         'python-pastedeploy', 
-         'python-netifaces', 
+         'python-greenlet',
+         'python-pastedeploy',
+         'python-netifaces',
          'python-pip',
          'python-dnspython',
-         'python-mock' 
+         'python-mock'
         ]:
 
-    ensure => installed,
+    ensure  => installed,
     require => Exec['apt-get update']
   }
 
@@ -72,7 +116,7 @@ class saio (
   }
 
   exec { 'make xfs file system on sparse disk':
-  command     => '/sbin/mkfs.xfs /srv/swift-disk',
+    command     => '/sbin/mkfs.xfs /srv/swift-disk',
     refreshonly => true,
     subscribe   => Exec['create sparse disk']
   }
@@ -86,56 +130,47 @@ class saio (
   }
 
   mount { '/mnt/sdb1':
-    device  => "/srv/swift-disk",
-    fstype  => "xfs",
-    ensure  => "mounted",
-    options => "loop,noatime,nodiratime,nobarrier,logbufs=8",
-    atboot  => "true",
-    require => [ 
+    ensure  => 'mounted',
+    device  => '/srv/swift-disk',
+    fstype  => 'xfs',
+    options => 'loop,noatime,nodiratime,nobarrier,logbufs=8',
+    atboot  => true,
+    require => [
                 Exec['make xfs file system on sparse disk'],
                 File['/mnt/sdb1']
                ]
   }
 
-  # 
-  # Create server mount points which are links to the /mnt/sdb1/[1,2,3,4] directories
   #
-
-  define create_srv_mnt_points() {
-    file { "/mnt/sdb1/${title}":
-      ensure => directory,
-    }
-    file { "/srv/${title}":
-      ensure  => link,
-      target  => "/mnt/sdb1/${title}",
-      require => File["/mnt/sdb1/${title}"]
-    }
-  }
+  # Create server mount points which are links to the
+  # /mnt/sdb1/[1,2,3,4] directories
+  #
 
   $srv_mnt_points = ['1','2','3','4']
 
-  create_srv_mnt_points { $srv_mnt_points: 
+  saio::create_srv_mnt_points { $srv_mnt_points:
     require => Mount['/mnt/sdb1'],
   }
 
-  # 
+  #
   # More directories...
-  # - Note that the parent directories have to exist too otherwise puppet will fail
+  # - Note that the parent directories have to exist too
+  #   otherwise puppet will fail
   #
 
   $server_dirs = [
-           '/etc/swift', 
-           '/etc/swift/object-server', 
-           '/etc/swift/container-server', 
-           '/etc/swift/account-server', 
+           '/etc/swift',
+           '/etc/swift/object-server',
+           '/etc/swift/container-server',
+           '/etc/swift/account-server',
            '/srv/1/node',
            '/srv/2/node',
            '/srv/3/node',
            '/srv/4/node',
-           '/srv/1/node/sdb1', 
-           '/srv/2/node/sdb2', 
-           '/srv/3/node/sdb3', 
-           '/srv/4/node/sdb4', 
+           '/srv/1/node/sdb1',
+           '/srv/2/node/sdb2',
+           '/srv/3/node/sdb3',
+           '/srv/4/node/sdb4',
            '/var/run/swift'
            ]
 
@@ -143,8 +178,8 @@ class saio (
     ensure  => directory,
     owner   => $swiftuser,
     group   => $swiftuser,
-    mode    => 644,
-    require => [ 
+    mode    => '0644',
+    require => [
                  File['/srv/1'],
                  File['/srv/2'],
                  File['/srv/3'],
@@ -156,16 +191,16 @@ class saio (
   #
   # rc.local
   # - note that this is probably not the best way to do this
-  # 
+  #
 
   file { '/etc/rc.local':
     content => template('saio/rc.local.erb'),
     owner   => root,
     group   => root,
-    mode    => 755
+    mode    => '0755',
   }
 
-  # 
+  #
   # Configure rsyncd
   #
 
@@ -173,22 +208,22 @@ class saio (
     content => template('saio/rsyncd.conf.erb'),
     owner   => root,
     group   => root,
-    mode    => 644,
+    mode    => '0644',
   }
 
   file { '/etc/default/rsync':
     source => 'puppet:///modules/saio/default_rsync',
     owner  => root,
     group  => root,
-    mode   => 644,
+    mode   => '0644',
   }
 
   service { 'rsync':
     ensure    => running,
     subscribe => File['/etc/rsyncd.conf'],
-    require   => [ 
-                   File['/etc/rsyncd.conf'], 
-                   File['/etc/default/rsync'], 
+    require   => [
+                   File['/etc/rsyncd.conf'],
+                   File['/etc/default/rsync'],
                    Package['rsync']
                   ],
   }
@@ -211,7 +246,7 @@ class saio (
     notify => Service['rsyslog'],
     group  => $swiftuser,
     owner  => $swiftgroup,
-    mode   => 644
+    mode   => '0644',
   }
 
   file { '/etc/rsyslog.conf':
@@ -219,7 +254,7 @@ class saio (
     notify => Service['rsyslog'],
     group  => root,
     owner  => root,
-    mode   => 644
+    mode   => '0644',
   }
 
   service { 'rsyslog':
@@ -231,7 +266,7 @@ class saio (
     ensure => directory,
     owner  => syslog,
     group  => adm,
-    mode   => 755,
+    mode   => '0755',
     notify => Service['rsyslog']
   }
 
@@ -239,13 +274,13 @@ class saio (
     ensure => directory,
     owner  => syslog,
     group  => adm,
-    mode   => 755,
+    mode   => '0755',
     notify => Service['rsyslog']
   }
 
   #
   # Download and build python-swiftclient and swift source
-  # 
+  #
 
   package { 'git':
     ensure => installed,
@@ -253,30 +288,30 @@ class saio (
 
   file {'/usr/local/src/swift':
     ensure => directory,
-    mode   => 777
+    mode   => '0777',
   }
-    
-  vcsrepo { "/usr/local/src/swift/python-swiftclient":
+
+  vcsrepo { '/usr/local/src/swift/python-swiftclient':
     ensure   => latest,
     owner    => $swiftuser,
     group    => $swiftuser,
     provider => git,
-    require  => [ 
-                  Package["git"],
-                  File['/usr/local/src/swift'] 
+    require  => [
+                  Package['git'],
+                  File['/usr/local/src/swift']
                 ],
     source   => $swiftclient_repo,
     revision => 'master',
   }
 
-  vcsrepo { "/usr/local/src/swift/swift":
+  vcsrepo { '/usr/local/src/swift/swift':
     ensure   => latest,
     owner    => $swiftuser,
     group    => $swiftuser,
     provider => git,
-    require  => [ 
-                  Package["git"],
-                  File['/usr/local/src/swift']  
+    require  => [
+                  Package['git'],
+                  File['/usr/local/src/swift']
                 ],
     source   => $swift_repo,
     revision => 'master',
@@ -284,17 +319,17 @@ class saio (
 
   #
   # Build python-swiftclient and swift
-  # 
+  #
 
   exec {'build python-swiftclient':
-    cwd => '/usr/local/src/swift/python-swiftclient',
+    cwd     => '/usr/local/src/swift/python-swiftclient',
     command => '/usr/bin/python setup.py develop',
     creates => '/usr/local/bin/swift',
     require => Vcsrepo['/usr/local/src/swift/python-swiftclient'],
   }
 
   exec {'build swift':
-    cwd => '/usr/local/src/swift/swift',
+    cwd     => '/usr/local/src/swift/swift',
     command => '/usr/bin/python setup.py develop',
     creates => '/usr/local/bin/swift-ring-builder',
     require => Vcsrepo['/usr/local/src/swift/swift']
@@ -306,18 +341,18 @@ class saio (
   #
 
   exec {'install required pip modules':
-    cwd => '/usr/local/src/swift/swift',
+    cwd     => '/usr/local/src/swift/swift',
     command => '/usr/bin/pip install -r test-requirements.txt',
-    require => [ 
-                 Package['python-pip'], 
-                 Exec['apt-get update'], 
+    require => [
+                 Package['python-pip'],
+                 Exec['apt-get update'],
                  Vcsrepo['/usr/local/src/swift/swift']
                 ]
   }
 
   #
   # Swift server configuration files
-  # 
+  #
 
   # XXX fix the user in this file XXX
   file { '/etc/swift/proxy-server.conf':
@@ -325,7 +360,7 @@ class saio (
     notify  => Service['rsyslog'],
     group   => $swiftuser,
     owner   => $swiftgroup,
-    mode    => 644
+    mode    => '0644',
   }
 
   # XXX fix the hashes to be variables XXX
@@ -334,33 +369,12 @@ class saio (
     notify => Service['rsyslog'],
     group  => $swiftuser,
     owner  => $swiftgroup,
-    mode   => 644
-  }
-
-  define create_srv_cfg_files {
-    file { "/etc/swift/object-server/${title}.conf":
-      content => template("saio/object-server-${title}.conf.erb"),
-      owner   => $swiftuser,
-      group   => $swiftgroup,
-      mode    => 644,
-    }
-    file { "/etc/swift/account-server/${title}.conf":
-      content => template("saio/account-server-${title}.conf.erb"),
-      owner   => $swiftuser,
-      group   => $swiftgroup,
-      mode    => 644,
-    }
-    file { "/etc/swift/container-server/${title}.conf":
-      content => template("saio/container-server-${title}.conf.erb"),
-      owner   => $swiftuser,
-      group   => $swiftgroup,
-      mode    => 644,         
-    } 
+    mode   => '0644',
   }
 
   $swift_srvs = ['1','2','3','4']
 
-  create_srv_cfg_files { $swift_srvs: }
+  saio::create_srv_cfg_files { $swift_srvs: }
 
   #
   # Helpful bash scripts
@@ -369,47 +383,48 @@ class saio (
   # XXX Could be reduced XXX
   file { '/usr/local/bin/resetswift':
     content => template('saio/resetswift.sh.erb'),
-    mode    => 755,
+    mode    => '0755',
     owner   => $swiftuser,
     group   => $swiftgroup,
   }
 
   file { '/usr/local/bin/remakerings':
     source => 'puppet:///modules/saio/remakerings.sh',
-    mode   => 755,
+    mode   => '0755',
     owner  => $swiftuser,
     group  => $swiftgroup,
   }
 
   file { '/usr/local/bin/startmain':
     source => 'puppet:///modules/saio/startmain.sh',
-    mode   => 755,
+    mode   => '0755',
     owner  => $swiftuser,
     group  => $swiftgroup,
   }
 
   file { '/usr/local/bin/startrest':
     source => 'puppet:///modules/saio/startrest.sh',
-    mode   => 755,
+    mode   => '0755',
     owner  => $swiftuser,
     group  => $swiftgroup,
   }
 
   file { '/usr/local/bin/papply':
     source => 'puppet:///modules/saio/papply.sh',
-    mode   => 755,
+    mode   => '0755',
     owner  => $swiftuser,
     group  => $swiftgroup,
   }
 
   #
   # Setup test environment
-  # 
+  #
 
-  # Going to put this into /etc/profile.d instead of trying to add it to the user's .bashrc
+  # Going to put this into /etc/profile.d instead of trying to add
+  # it to the user's .bashrc
   file { '/etc/profile.d/swift_test.sh':
     source => 'puppet:///modules/saio/swift_test.sh',
-    mode   => 644,
+    mode   => '0644',
     owner  => $swiftuser,
     group  => $swiftgroup,
   }
@@ -423,15 +438,16 @@ class saio (
   }
 
   # Run the unittests once
-  # - note setting the environment variable just in case, is also in swift_test.sh
+  # - note setting the environment variable just in case,
+  #   is also in swift_test.sh
   exec { "${swift_dir}/.unittests":
-    environment => "SWIFT_TEST_CONFIG_FILE=/etc/swift/test.conf",
-    command => "${swift_dir}/.unittests && touch ${swift_dir}/unittests.run",
-    creates => "${swift_dir}/unittests.run",
-    require => [
-                 Exec['install required pip modules'],
-                 File['/etc/swift/test.conf'],
-                 Vcsrepo['/usr/local/src/swift/swift']
-                ]
+    environment => 'SWIFT_TEST_CONFIG_FILE=/etc/swift/test.conf',
+    command     => "${swift_dir}/.unittests && touch ${swift_dir}/unittests.run",
+    creates     => "${swift_dir}/unittests.run",
+    require     => [
+                     Exec['install required pip modules'],
+                     File['/etc/swift/test.conf'],
+                     Vcsrepo['/usr/local/src/swift/swift']
+                   ]
   }
 }

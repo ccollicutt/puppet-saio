@@ -17,13 +17,14 @@ and have OpenStack Swift deployed from source, either the official repositories 
 
 ###Parameters
 
-Currently the SAIO class takes four parameters, which are shown below with their defaults:
+Currently the SAIO class takes five parameters, which are shown below with their defaults:
 
 ```
 $swiftuser='vagrant', 
 $swiftgroup='vagrant',
 $swiftclient_repo='https://github.com/openstack/python-swiftclient.git',
 $swift_repo='https://github.com/openstack/swift.git'
+$pkg_cache_srv=undef
 ```
 
 So you an change those in the nodes.pp file to whatever you prefer.
