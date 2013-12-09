@@ -48,6 +48,12 @@ class saio (
   ) {
 
   #
+  # Get all the params
+  # 
+
+  include saio::params
+
+  #
   # Install OpenStack Swift exactly the way Swift All In One describes
   # See: http://docs.openstack.org/developer/swift/development_saio.html
   #
@@ -73,30 +79,7 @@ class saio (
   }
 
   # now start installing as per instructions...
-  package { [
-         'curl',
-         'gcc',
-         'memcached',
-         'rsync',
-         'sqlite3',
-         'xfsprogs',
-         'git-core',
-         'libffi-dev',
-         'python-setuptools',
-         'python-coverage',
-         'python-dev',
-         'python-nose',
-         'python-simplejson',
-         'python-xattr',
-         'python-eventlet',
-         'python-greenlet',
-         'python-pastedeploy',
-         'python-netifaces',
-         'python-pip',
-         'python-dnspython',
-         'python-mock'
-        ]:
-
+  package { $saio::params::packages:
     ensure  => installed,
     require => Exec['apt-get update']
   }
@@ -146,9 +129,7 @@ class saio (
   # /mnt/sdb1/[1,2,3,4] directories
   #
 
-  $srv_mnt_points = ['1','2','3','4']
-
-  saio::create_srv_mnt_points { $srv_mnt_points:
+  saio::functions::mountpoints { $saio::params::server_mount_points:
     require => Mount['/mnt/sdb1'],
   }
 
@@ -158,23 +139,7 @@ class saio (
   #   otherwise puppet will fail
   #
 
-  $server_dirs = [
-           '/etc/swift',
-           '/etc/swift/object-server',
-           '/etc/swift/container-server',
-           '/etc/swift/account-server',
-           '/srv/1/node',
-           '/srv/2/node',
-           '/srv/3/node',
-           '/srv/4/node',
-           '/srv/1/node/sdb1',
-           '/srv/2/node/sdb2',
-           '/srv/3/node/sdb3',
-           '/srv/4/node/sdb4',
-           '/var/run/swift'
-           ]
-
-  file { $server_dirs:
+  file { $saio::params::server_directories:
     ensure  => directory,
     owner   => $swiftuser,
     group   => $swiftuser,
@@ -186,7 +151,6 @@ class saio (
                  File['/srv/4'],
                ]
   }
-
 
   #
   # rc.local
@@ -372,9 +336,8 @@ class saio (
     mode   => '0644',
   }
 
-  $swift_srvs = ['1','2','3','4']
 
-  saio::create_srv_cfg_files { $swift_srvs: }
+  saio::functions::serverconfig { $saio::params::storage_servers: }
 
   #
   # Helpful bash scripts
@@ -429,7 +392,7 @@ class saio (
     group  => $swiftgroup,
   }
 
-  $swift_dir = '/usr/local/src/swift/swift'
+  $swift_dir = $saio::params::swift_source_directory
 
   # Just make this a link instead of copying
   file { '/etc/swift/test.conf':

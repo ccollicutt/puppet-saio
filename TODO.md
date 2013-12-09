@@ -1,6 +1,7 @@
 TODO
 ====
 
+* move class params to params.pp properly
 * cleanup puppet.sh
 * fix hostname warning
 * try to use puppet's version of lineinefile instead of so many templates and files
