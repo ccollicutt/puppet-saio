@@ -16,7 +16,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Install vcsrepo b/c we need it to run the saio module
   config.vm.provision :shell do |shell|
     shell.inline = "mkdir -p /etc/puppet/modules;
-                    puppet module install puppetlabs/vcsrepo"
+                    puppet module install puppetlabs/vcsrepo 
+                    puppet module install puppetlabs/stdlib"
   end
 
   config.vm.provision :puppet do |puppet|
