@@ -1,5 +1,10 @@
 #CHANGELOG
 
+##0.2.1
+
+* Fixup documentation
+* Add stdlib dependency to Modulefile
+
 ##0.2.0
 
 * Move everything out into its own class file, still more to do

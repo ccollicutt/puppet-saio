@@ -35,13 +35,14 @@ Some of the things it affects:
  
 ###Beginning with SAIO	
 
-First, this module uses the [Vcsrepo module](https://forge.puppetlabs.com/puppetlabs/vcsrepo), so that needs to be installed.
+First, this module uses the [Vcsrepo module](https://forge.puppetlabs.com/puppetlabs/vcsrepo) and stdlib so those need to be installed.
 
 ```
 puppet module install puppetlabs/vcsrepo
+puppet module install puppetlabs/stdlib
 ```
 
-Once Vcsrepo is installed, we can now use the module by initiating use of the saio class and optionally provide parameters for swiftuser and swiftgroup:
+We can now use the module by initiating use of the saio class and optionally provide parameters for swiftuser and swiftgroup:
 
 ```
 node 'precise64' {
@@ -58,6 +59,7 @@ $swiftgroup='vagrant',
 $swiftclient_repo='https://github.com/openstack/python-swiftclient.git',
 $swift_repo='https://github.com/openstack/swift.git',
 $package_cache_srv=undef,
+$run_unittests=true,
 ```
 
 The package_cache_srv is a apt-cache-ng server's IP address. Usually I have a local vm running apt-cache-ng which  projects like SAIO use to grab packages from instead of having to download them from the Internet every single time.
