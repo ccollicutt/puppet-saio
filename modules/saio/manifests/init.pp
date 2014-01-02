@@ -45,6 +45,7 @@ class saio (
   $swiftclient_repo='https://github.com/openstack/python-swiftclient.git',
   $swift_repo='https://github.com/openstack/swift.git',
   $package_cache_srv=undef,
+  $run_unittests=true,
   ) {
 
   #
@@ -56,8 +57,7 @@ class saio (
 
   include saio::params
 
-  # Anchor this as per #8040 - this ensures that classes won't float off and
-  # mess everything up.  You can read about this at:
+  # Anchor this as per #8040 
   # http://docs.puppetlabs.com/puppet/2.7/reference/lang_containment.html#known-issues
 
   anchor { 'saio::begin': } ->
@@ -67,8 +67,16 @@ class saio (
   class { '::saio::files': } ->
   class { '::saio::build': } ->
   class { '::saio::config': } ~>
-  class { '::saio::service': } ->
-  class { '::saio::test': } ->
+  class { '::saio::service': }
+
+  if $run_unittests == 'true' {
+    notice("running unittests")
+    class { '::saio::test': }
+  }
+  else {
+    notice("NOT running unittests")
+  }
+
   anchor { 'saio::end': }
 
 }
