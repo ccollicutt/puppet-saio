@@ -31,6 +31,7 @@ class saio::params {
 				           '/etc/swift/object-server',
 				           '/etc/swift/container-server',
 				           '/etc/swift/account-server',
+				           '/srv',
 				           '/srv/1/node',
 				           '/srv/2/node',
 				           '/srv/3/node',
