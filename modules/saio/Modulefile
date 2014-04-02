@@ -1,5 +1,5 @@
 name 'serverascode-saio'
-version '0.2.1'
+version '0.2.2'
 dependency 'puppetlabs/vcsrepo'
 dependency 'puppetlabs/stdlib'
 summary "Deploy OpenStack Swift-all-in-one"

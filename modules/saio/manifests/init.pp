@@ -45,7 +45,8 @@ class saio (
   $swiftclient_repo='https://github.com/openstack/python-swiftclient.git',
   $swift_repo='https://github.com/openstack/swift.git',
   $package_cache_srv=undef,
-  $run_unittests=true,
+  $run_unittests=false,
+  $start_swift=true,
   ) {
 
   #
@@ -66,17 +67,10 @@ class saio (
   class { '::saio::directories': } ->
   class { '::saio::files': } ->
   class { '::saio::build': } ->
-  class { '::saio::config': } ~>
-  class { '::saio::service': }
-
-  if $run_unittests == 'true' {
-    notice("running unittests")
-    class { '::saio::test': }
-  }
-  else {
-    notice("NOT running unittests")
-  }
-
+  class { '::saio::test': } ->
+  class { '::saio::config': } ->
+  class { '::saio::service': } ->
+  class { '::saio::start_swift': } ~>
   anchor { 'saio::end': }
 
 }

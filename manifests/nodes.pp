@@ -1,6 +1,5 @@
 node 'precise64' {
 	class { 'saio':
-		package_cache_srv => '192.168.100.20',
-		run_unittests     => 'false',
+		package_cache_srv => "10.10.10.10",
 	}
 }

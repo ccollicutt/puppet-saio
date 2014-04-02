@@ -54,22 +54,28 @@ node 'precise64' {
 There are a few optional parameters. Below are their defaults:
 
 ```
-$swiftuser='vagrant', 
+$swiftuser='vagrant',
 $swiftgroup='vagrant',
 $swiftclient_repo='https://github.com/openstack/python-swiftclient.git',
 $swift_repo='https://github.com/openstack/swift.git',
 $package_cache_srv=undef,
-$run_unittests=true,
+$run_unittests=false,
+$start_swift=true,
 ```
 
 The package_cache_srv is a apt-cache-ng server's IP address. Usually I have a local vm running apt-cache-ng which  projects like SAIO use to grab packages from instead of having to download them from the Internet every single time.
 
 ### Post puppet
 
-Once the puppet install has run its course, you can now use the bash scripts to generate the ring files and (hopefully) startup Swift.
+#### start_swift set to false
+
+If start_swift was set to false, then the rings will not be created, and the various swift services will not be started, and will be left to be done by hand.
+
+Once the puppet install has run its course, you can now use the bash scripts to generate the ring files and (hopefully) startup Swift. Note that swift is going to run as the vagrant user.
+
 
 ```
-vagrant@precise64:/etc/puppet$ remakerings 
+vagrant@precise64:/etc/swift$ remakerings 
 Device d0r1z1-127.0.0.1:6010R127.0.0.1:6010/sdb1_"" with 1.0 weight got id 0
 Device d1r1z2-127.0.0.1:6020R127.0.0.1:6020/sdb2_"" with 1.0 weight got id 1
 Device d2r1z3-127.0.0.1:6030R127.0.0.1:6030/sdb3_"" with 1.0 weight got id 2
@@ -107,6 +113,58 @@ Starting object-server...(/etc/swift/object-server/3.conf)
 Starting object-server...(/etc/swift/object-server/4.conf)
 ```
 
+Startrest:
+
+```bash
+vagrant@precise64:~$ startrest
+WARNING: Unable to modify file descriptor limit.  Running as non-root?
+Starting container-updater...(/etc/swift/container-server/1.conf)
+Starting container-updater...(/etc/swift/container-server/2.conf)
+Starting container-updater...(/etc/swift/container-server/3.conf)
+Starting container-updater...(/etc/swift/container-server/4.conf)
+Starting account-auditor...(/etc/swift/account-server/1.conf)
+Starting account-auditor...(/etc/swift/account-server/2.conf)
+Starting account-auditor...(/etc/swift/account-server/3.conf)
+Starting account-auditor...(/etc/swift/account-server/4.conf)
+Starting object-replicator...(/etc/swift/object-server/1.conf)
+Starting object-replicator...(/etc/swift/object-server/2.conf)
+Starting object-replicator...(/etc/swift/object-server/3.conf)
+Starting object-replicator...(/etc/swift/object-server/4.conf)
+Starting container-replicator...(/etc/swift/container-server/1.conf)
+Starting container-replicator...(/etc/swift/container-server/2.conf)
+Starting container-replicator...(/etc/swift/container-server/3.conf)
+Starting container-replicator...(/etc/swift/container-server/4.conf)
+Starting object-auditor...(/etc/swift/object-server/1.conf)
+Starting object-auditor...(/etc/swift/object-server/2.conf)
+Starting object-auditor...(/etc/swift/object-server/3.conf)
+Starting object-auditor...(/etc/swift/object-server/4.conf)
+Unable to locate config for object-expirer
+Starting container-auditor...(/etc/swift/container-server/1.conf)
+Starting container-auditor...(/etc/swift/container-server/2.conf)
+Starting container-auditor...(/etc/swift/container-server/3.conf)
+Starting container-auditor...(/etc/swift/container-server/4.conf)
+Starting account-replicator...(/etc/swift/account-server/1.conf)
+Starting account-replicator...(/etc/swift/account-server/2.conf)
+Starting account-replicator...(/etc/swift/account-server/3.conf)
+Starting account-replicator...(/etc/swift/account-server/4.conf)
+Starting account-reaper...(/etc/swift/account-server/1.conf)
+Starting account-reaper...(/etc/swift/account-server/2.conf)
+Starting account-reaper...(/etc/swift/account-server/3.conf)
+Starting account-reaper...(/etc/swift/account-server/4.conf)
+Starting container-sync...(/etc/swift/container-server/1.conf)
+Starting container-sync...(/etc/swift/container-server/2.conf)
+Starting container-sync...(/etc/swift/container-server/3.conf)
+Starting container-sync...(/etc/swift/container-server/4.conf)
+Starting object-updater...(/etc/swift/object-server/1.conf)
+Starting object-updater...(/etc/swift/object-server/2.conf)
+Starting object-updater...(/etc/swift/object-server/3.conf)
+Starting object-updater...(/etc/swift/object-server/4.conf)
+```
+
+####Once swift has started
+
+If swift_start was set to true, or the remakerings, startmain, startrest commands were run by hand, then at this point swift should be fully operational and files can be uploaded.
+
 Next, upload a file:
 
 ```
@@ -120,6 +178,7 @@ swift.txt
 ##Limitations
 
 * Only works on Ubuntu 12.04
+* Has only been tested with the official Vagrant Ubuntu Precise64 image
 
 ##Development
 

@@ -47,14 +47,20 @@ class saio::build inherits saio {
     cwd     => '/usr/local/src/swift/python-swiftclient',
     command => '/usr/bin/python setup.py develop',
     creates => '/usr/local/bin/swift',
-    require => Vcsrepo['/usr/local/src/swift/python-swiftclient'],
+    require => [
+                  Vcsrepo['/usr/local/src/swift/python-swiftclient'], 
+                  Exec['install required python-swiftclient pip modules']
+                ]
   }
 
   exec {'build swift':
     cwd     => '/usr/local/src/swift/swift',
     command => '/usr/bin/python setup.py develop',
     creates => '/usr/local/bin/swift-ring-builder',
-    require => Vcsrepo['/usr/local/src/swift/swift']
+    require => [
+                  Vcsrepo['/usr/local/src/swift/swift'], 
+                  Exec['install required swift pip modules']
+                ]
   }
 
   #
@@ -62,13 +68,23 @@ class saio::build inherits saio {
   # - maybe there is a puppet resource for pip?
   #
 
-  exec {'install required pip modules':
+  exec {'install required swift pip modules':
     cwd     => '/usr/local/src/swift/swift',
     command => '/usr/bin/pip install -r test-requirements.txt',
     require => [
                  Package['python-pip'],
                  Exec['apt-get update'],
                  Vcsrepo['/usr/local/src/swift/swift']
+                ]
+  }
+
+  exec {'install required python-swiftclient pip modules':
+    cwd     => '/usr/local/src/swift/python-swiftclient',
+    command => '/usr/bin/pip install -r test-requirements.txt',
+    require => [
+                 Package['python-pip'],
+                 Exec['apt-get update'],
+                 Vcsrepo['/usr/local/src/swift/python-swiftclient']
                 ]
   }
 

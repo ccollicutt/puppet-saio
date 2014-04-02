@@ -47,5 +47,4 @@ class saio::params {
 
  $swift_source_directory = '/usr/local/src/swift/swift'
 
-
 }

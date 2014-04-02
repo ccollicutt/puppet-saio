@@ -1,5 +1,12 @@
 #CHANGELOG
 
+##0.2.2
+
+* Add swift_start that runs remakerings, startmain, startrest if desired, default is not to start swift
+* start_swift is set to true by default
+* Issue with "raise TypeError, "dist must be a Distribution instance" error, so added installation of python-swiftclient test-requirements.txt file with pip
+
+
 ##0.2.1
 
 * Fixup documentation
