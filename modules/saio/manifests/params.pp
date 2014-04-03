@@ -1,5 +1,13 @@
 class saio::params {
 	
+  $swiftuser         = 'vagrant'
+  $swiftgroup        = 'vagrant'
+  $swiftclient_repo  = 'https://github.com/openstack/python-swiftclient.git'
+  $swift_repo        = 'https://github.com/openstack/swift.git'
+  $package_cache_srv = undef
+  $run_unittests     = false
+  $start_swift       = true
+
   $server_mount_points = ['1','2','3','4']
   
   $packages = [

@@ -40,14 +40,14 @@
 # Copyright 2013
 #
 class saio (
-  $swiftuser='vagrant',
-  $swiftgroup='vagrant',
-  $swiftclient_repo='https://github.com/openstack/python-swiftclient.git',
-  $swift_repo='https://github.com/openstack/swift.git',
-  $package_cache_srv=undef,
-  $run_unittests=false,
-  $start_swift=true,
-  ) {
+  $swiftuser           = $saio::params::swiftuser,
+  $swiftgroup          = $saio::params::swiftgroup,
+  $swiftclient_repo    = $saio::params::swiftclient_repo,
+  $swift_repo          = $saio::params::swift_repo,
+  $package_cache_srv   = $saio::params::package_cache_srv,
+  $run_unittests       = $saio::params::run_unittests,
+  $start_swift         = $saio::params::start_swift
+  ) inherits saio::params {
 
   #
   # Install OpenStack Swift exactly the way Swift All In One describes
@@ -70,7 +70,7 @@ class saio (
   class { '::saio::test': } ->
   class { '::saio::config': } ->
   class { '::saio::service': } ->
-  class { '::saio::start_swift': } ~>
+  class { '::saio::start_swift': } ->
   anchor { 'saio::end': }
 
 }

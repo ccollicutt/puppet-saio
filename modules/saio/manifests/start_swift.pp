@@ -4,7 +4,7 @@ class saio::start_swift inherits saio {
   # Only run if start_swift is set
   #
 
-  if $start_swift == 'true' {
+  if $start_swift == true {
 
 	  exec { "remakerings":
 	    command => "/usr/local/bin/remakerings",
@@ -51,5 +51,7 @@ class saio::start_swift inherits saio {
 	  	command  => '/usr/local/bin/startrest',
 	  	require  => Exec['startmain']
 	  }
+  } else {
+		notify{"start_swift false, NOT starting swift processes...": }
   }
 }
