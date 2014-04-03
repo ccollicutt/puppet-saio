@@ -1,5 +1,10 @@
 #CHANGELOG
 
+##0.2.3
+
+* Fixed up swift_start issue
+* Added /var/cache/swift* directories to server_directories; they were in the rc.local file but unless the system is rebooted they won't be set
+
 ##0.2.2
 
 * Add swift_start that runs remakerings, startmain, startrest if desired, default is not to start swift

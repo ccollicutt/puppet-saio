@@ -48,7 +48,11 @@ class saio::params {
 				           '/srv/2/node/sdb2',
 				           '/srv/3/node/sdb3',
 				           '/srv/4/node/sdb4',
-				           '/var/run/swift'
+				           '/var/run/swift',
+				           '/var/cache/swift',
+				           '/var/cache/swift2',
+				           '/var/cache/swift3',
+				           '/var/cache/swift4'
          				 ]
 
  $storage_servers = ['1','2','3','4']
