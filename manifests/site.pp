@@ -1,1 +1,4 @@
-import 'nodes.pp'
+node 'precise64' {
+	class { 'saio':
+	}
+}
